@@ -6,6 +6,7 @@ Most PDF articles found online have useless metadata.
 To manage a library you will have to rely on 
 - the filesystem, which is limited
 - or an external database = additional state to maintain + can lock you into an "ecosystem" :‑###..
+
 However, PDF metadata is stored alongside the content and can contain a list of authors and a journal for easier searching.
 
 ## Advantages
