@@ -1,0 +1,32 @@
+# Fix Article Metadata, fam
+
+Manage your articles using PDF metadata, Unix-style.
+
+Most PDF articles found online have useless metadata.
+To manage a library you will have to rely either on the filesystem (is limited) or an external database (additional state to maintain + can lock you into an "ecosystem" :‑###..).
+However, PDF metadata is stored alongside the content and can contain a list of authors and a journal for easier searching.
+
+## Advantages
+- interoperability: metadata is easily accessible to other programs (pro-tip: look into `fzf`),
+- freedom: no proprietary databases with special tools enforcing their workflow,
+- hackability: the scripts are short, POSIX-compliant, pipe-able and accept wildcards, where applicable.
+
+## How to use
+1. Interactively find a correct DOI of a PDF with `doi-repair`.
+No automatic internet searches and fancy algorithms -- you are way more reliable in finding a correct DOI anyway.
+Then, data from CrossRef is used to populate *standard* PDF metadata with a list of authors, a title, and an *ISO-690*-like reference with a DOI.
+2. Enjoy the profits: `doi-rename` to unify your filenames, get a DOI with `doi-infer` and convert it to a BibTeX entry with `doi-to-bibtex` or whatever else you have. The data is open -- use it!
+
+## Dependencies
+The things you already have most likely.
+- `pdftk`, an excellent PDF editing utility
+- `pdfinfo` from the `poppler` package (a dependency of `pdftk`)
+- a PDF viewer callable by `xdg-open`
+- standard Linux utilities: `grep`, `curl` and others
+
+## Disclaimer
+No guarantees, things might crash and burn, so be careful.
+*Works on my machine*™.
+
+## TODO
+- embedding keywords

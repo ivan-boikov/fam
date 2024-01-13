@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Rename a PDF according to its metadata
+# The GPLv3 License (GPLv3)
+#
+# Copyright (c) 2024 Ivan Boikov
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+if [ -z "$1" ]; then printf "Usage: doi-rename [PDF]...\n\nRename article PDF according to its metadata.\n" && exit ; fi
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+while [ "$#" -ne 0 ]; do
+	if [ ! -f "$1" ]; then printf "${RED}%s${NC} not found\n" "$1" && shift && continue ; fi
+
+	meta="$(pdfinfo "$1")"
+	surname="$(echo "$meta" | grep Author | cut -d: -f2 | sed -e 's/, /\n/g' -e 's/ and /\n/g' | head -n1 | xargs | rev | cut -d' ' -f1 | rev)"
+	year="$(echo "$meta" | grep Subject | cut -d: -f2 | cut -d, -f2 | xargs)"
+	title="$(echo "$meta" | grep Title | cut -d: -f2- | xargs | tr '/' '-')"
+
+	# trim title length, 128 should suffice in most cases
+	title="$(echo $title | cut -c -128)"
+
+	if [ -z "$surname" ] || [ -z "$title" ] || ! [ "$year" -eq 0 -o "$year" -ne 0 ] >/dev/null 2>&1 ; then
+		printf "${RED}%s${NC} has incorrect metadata, use doi-repair first\n" "$1"
+		printf "\tSurname: %s\n\tYear: %s\n\tTitle: %s\n" "$surname" "$year" "$title"
+		shift && continue
+	fi
+
+	# personal preference: kebab-case with lower-case symbols
+	fname="$(echo "$surname$year-$title.pdf" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+
+	mv -n "$1" "$(dirname "$1")/$fname"
+
+	shift
+done

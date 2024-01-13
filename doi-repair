@@ -1,0 +1,98 @@
+#!/bin/sh
+
+# interactively infer DOI and assigns standard PDF metadata fields (Author, Title and Subject) based on it
+#	here, Subject contains an ISO 690 reference + DOI as proposed in https://www.crossref.org/blog/metadata-in-pdf-1.-strategies/
+# The GPLv3 License (GPLv3)
+#
+# Copyright (c) 2024 Ivan Boikov
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+show_hint(){
+	printf "Usage: doi-repair [PDF]...\n\nInteractively infer DOI and set corresponding standard PDF metadata (Author, Title and Subject).\nThe \"Subject\" field will contain an ISO 690-style reference with a DOI.\n"
+}
+
+prompt(){
+	printf "%s (y/n) " "$1"
+	old_stty_cfg=$(stty -g)
+	stty raw -echo ; answer=$(head -c 1) ; stty "$old_stty_cfg" ; printf "%s\n" "$answer"
+	[ ! "$answer" = "${answer#[Yy]}" ]
+}
+
+if [ -z "$1" ]; then show_hint && exit ; fi
+
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+while [ "$#" -ne 0 ]; do
+	if [ ! -f "$1" ]; then printf "File %s not found\n" "$1" && shift && continue ; fi
+
+	printf "Processing: ${RED}%s${NC}\n" "$1"
+
+	doi="$(doi-infer "$1")"
+	if [ -n "$doi" ]; then
+		printf "Detected DOI:\n"
+		printf "\t${RED}%s${NC}\n" $doi
+	fi
+
+	# without ./ can be considered as a URL
+	xdg-open "./$1" > /dev/null 2>&1 &
+
+	skip="0"
+	success="0"
+	while [ "$success" != "1" ] ; do
+
+		if [ -z "$doi" ]; then
+			#if ! prompt ", try to set manually?"; then skip="1" && break ; fi
+			printf "Unable to detect DOI, input manually (blank to skip): "
+			read -r doi
+			if [ -z "$doi" ]; then echo "Skipped" && skip="1" && break ; fi
+		fi
+
+		# doi-infer could output multiple options
+		IFS='
+		'
+		for doi_ in $doi; do
+			printf "\nMetadata for ${RED}\"%s\"${NC}:\n" "$doi_"
+			printf "%s\n" "$(doi-to-bibtex "$doi_" | bibtex-to-meta | grep "InfoValue:" | sed 's/InfoValue:/\t/g')"
+			if prompt "Does it match the document?"; then doi="$doi_" && success="1" && break ; fi
+		done
+
+		if [ "$success" != "1" ]; then doi="" ; fi
+	done
+
+	# terminate all programs using the PDF in question to close previously started xdg-open
+	fuser -s -k -TERM "$1"
+
+	if [ "$skip" = "1" ]; then shift && continue ; fi
+
+	# assign new metadata
+	# pdftk can't write in-place
+	mv "$1" "$XDG_CACHE_HOME/backup.pdf"
+	# dump current metadata
+	pdftk "$XDG_CACHE_HOME/backup.pdf" dump_data output "$XDG_CACHE_HOME/pdfmetadata" > /dev/null 2>&1
+	# append new entries to metadata file to overwrite existing ones
+	doi-to-bibtex "$doi" | bibtex-to-meta >> "$XDG_CACHE_HOME/pdfmetadata"
+	# write new metadata
+	pdftk "$XDG_CACHE_HOME/backup.pdf" update_info "$XDG_CACHE_HOME/pdfmetadata" output "$1" > /dev/null 2>&1
+
+	# preserve the file modification date
+	touch --date="@$(stat -c %Y "$XDG_CACHE_HOME/backup.pdf")" "$1"
+
+	printf "\n"
+
+	shift
+done

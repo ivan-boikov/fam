@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Cached curl to be polite to CrossRef servers
+# The GPLv3 License (GPLv3)
+#
+# Copyright (c) 2024 Ivan Boikov
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+[ -z "$1" ] && echo "Usage: cached-ccurl [curl query]" && exit
+
+cache_dir="$XDG_CACHE_HOME/ccurl"
+mkdir -p "$cache_dir"
+
+# unix filenames can contain any character beside / and EOL
+cache_file="$cache_dir/$(echo "$1" | tr '/' '-')"
+
+if [ ! -e "$cache_file" ]; then
+	curl -s "$@" > "$cache_file"
+fi
+
+cat "$cache_file"

@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# Generate metadata for pdftk based on DOI
+# The GPLv3 License (GPLv3)
+#
+# Copyright (c) 2024 Ivan Boikov
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+if [ -t 0 ] && [ -z "$1" ]; then
+	echo "Usage: bibtex-to-meta [STRING]\n\nGenerate pdftk metadata file based on a Bibtex entry.\nWith no STRING, read from standard input."
+	exit
+fi
+
+parse_bibtex(){
+	echo "$1" | grep -Po "$2={.+?}" | awk -F '[{}]' '{print $2}'
+}
+
+add_pdf_meta(){
+	# the format used by pdftk
+	printf "InfoBegin\nInfoKey: %s\nInfoValue: %s\n" "$1" "$2"
+}
+
+process_bibtex(){
+	author="$(parse_bibtex "$1" "author")"
+	# convert Bibtex-style author list to natural style
+	author="$(echo "$author" | sed 's/ and /\n/g' | sed 's/, /\n/g' | tac | paste -d' ' - - | tac | awk '{print}' ORS=', ')"
+	author="${author%??}" # cut off excess ", " at the end
+
+	title="$(parse_bibtex "$1" "title")"
+
+	journal="$(parse_bibtex "$1" "journal")"
+	# maybe more fallbacks?
+	if [ -z "$journal" ]; then journal="$(parse_bibtex "$1" "booktitle")" ; fi
+
+	year="$(parse_bibtex "$1" "year")"
+	volume="$(parse_bibtex "$1" "volume")"
+	number="$(parse_bibtex "$1" "number")"
+	pages="$(parse_bibtex "$1" "pages")"
+	doi="$(parse_bibtex "$1" "DOI" | tr '[:lower:]' '[:upper:]')"
+
+	subject=""
+	# ISO 690 (kind of, no guarantees)
+	if [ -n "$journal" ]; then subject="$subject, $journal"     ; fi
+	if [ -n "$year" ];    then subject="$subject, $year"        ; fi
+	if [ -n "$volume" ];  then subject="$subject, vol. $volume" ; fi
+	if [ -n "$number" ];  then subject="$subject, no. $number"  ; fi
+	if [ -n "$pages" ];   then subject="$subject, p. $pages"    ; fi
+	if [ -n "$doi" ];     then subject="$subject, doi:$doi"     ; fi
+
+	add_pdf_meta "Title"   "$title"
+	add_pdf_meta "Author"  "$author"
+	add_pdf_meta "Subject" "${subject#??}" # cut off ", " in the beginning
+}
+
+[ ! -t 0 ] && process_bibtex "$(cat)"
+[ -n "$1" ] && process_bibtex "$1"
