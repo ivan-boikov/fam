@@ -1,13 +1,15 @@
 # Fix Article Metadata, fam
 
-Manage your articles using PDF metadata, Unix-style.
+Manage your scientific article library using PDF metadata, Unix-style.
 
 Most PDF articles found online have useless metadata.
-To manage a library you will have to rely either on the filesystem (is limited) or an external database (additional state to maintain + can lock you into an "ecosystem" :‑###..).
+To manage a library you will have to rely on 
+- the filesystem, which is limited
+- or an external database = additional state to maintain + can lock you into an "ecosystem" :‑###..
 However, PDF metadata is stored alongside the content and can contain a list of authors and a journal for easier searching.
 
 ## Advantages
-- interoperability: metadata is easily accessible to other programs (pro-tip: look into `fzf`),
+- interoperability: files stay where they were and their metadata is open to other programs (pro-tip: look into `fzf`),
 - freedom: no proprietary databases with special tools enforcing their workflow,
 - hackability: the scripts are short, POSIX-compliant, pipe-able and accept wildcards, where applicable.
 
