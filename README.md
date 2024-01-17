@@ -14,6 +14,14 @@ However, PDF metadata is stored alongside the content and can contain a list of 
 - freedom: no proprietary databases with special tools enforcing their workflow,
 - hackability: the scripts are short, POSIX-compliant, pipe-able and accept wildcards, where applicable.
 
+## Installation
+```shell
+git clone https://github.com/ivan-boikov/fam && cd fam && make install
+```
+By default it will install symlinks in `$HOME/.local/bin`.
+Change to whatever inside the Makefile, but be sure it's in `$PATH`.
+Run `make uninstall` to uninstall.
+
 ## How to use
 1. Interactively find a correct DOI of a PDF with `doi-repair`.
 No automatic internet searches and fancy algorithms -- you are way more reliable in finding a correct DOI anyway.
@@ -29,7 +37,7 @@ find <library path> -name '*.pdf' | doi-infer | doi-to-bibtex | sed 's/\}, /\},\
 or whatever else you have, the data is open, so use it!
 
 ## Dependencies
-The things you already have most likely.
+The things you already have most likely:
 - `pdftk`, an excellent PDF editing utility
 - `pdfinfo` from the `poppler` package (a dependency of `pdftk`)
 - a PDF viewer callable by `xdg-open`
