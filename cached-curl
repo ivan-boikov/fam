@@ -21,7 +21,7 @@
 
 [ -z "$1" ] && echo "Usage: cached-ccurl [curl query]" && exit
 
-cache_dir="$XDG_CACHE_HOME/ccurl"
+cache_dir="$XDG_CACHE_HOME/cached-curl"
 mkdir -p "$cache_dir"
 
 # unix filenames can contain any character beside / and EOL
