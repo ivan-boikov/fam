@@ -29,7 +29,7 @@ while [ "$#" -ne 0 ]; do
 
 	meta="$(pdfinfo -custom "$1")"
 	surname="$(echo "$meta" | grep Author | cut -d: -f2 | sed -e 's/, /\n/g' -e 's/ and /\n/g' | head -n1 | xargs | rev | cut -d' ' -f1 | rev)"
-	year="$(echo "$meta" | grep Subject | grep -Po ', (\d{4}), vol. ' | cut -d, -f2 | xargs)"
+	year="$(echo "$meta" | grep Subject | grep -Po ', (\d{4}), ' | cut -d, -f2 | xargs)"
 	title="$(echo "$meta" | grep Title | cut -d: -f2- | xargs | tr '/' '-')"
 
 	# trim title length, 128 should suffice in most cases
