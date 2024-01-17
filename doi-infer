@@ -19,18 +19,20 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-[ -z "$1" ] && printf "Usage: doi-infer [PDF]\n\nNoninteractively infer DOI of a PDF based on (in order)\n\t1. standard and custom metadata\n\t2. document-level metadata\n\t3. PDF content\nWarning: content search returns everything found and can be incorrect (example: DOI of a reference).\n" && exit
+[ -z "$1" ] && printf "Usage: doi-infer [PDF]...\n\nNoninteractively infer DOI of PDF(-s) based on (in order)\n\t1. standard and custom metadata\n\t2. document-level metadata\n\t3. PDF content\nWarning: content search returns everything found and can be incorrect (example: DOI of a reference).\n" && exit
 
-# "custom" = standard+custom properties
-# "meta" = document-level metadata
-# both are likely to be correct
-doi="$(pdfinfo -custom "$1" | doi-grep)" || doi="$(pdfinfo -meta "$1" | doi-grep)"
+while [ "$#" -ne 0 ]; do
+	if [ ! -f "$1" ]; then printf "File %s not found\n" "$1" && shift && continue ; fi
 
-if [ -z "$doi" ]; then
-	doi="$(pdftotext -q "$1" - | doi-grep)"
-	if [ -n "$doi" ]; then
-		>&2 echo "Warning: DOI found in content only, mistakes are likely"
+	# "custom" = standard+custom properties
+	# "meta" = document-level metadata
+	# both are likely to be correct
+	doi="$(pdfinfo -custom "$1" | doi-grep)" || doi="$(pdfinfo -meta "$1" | doi-grep)"
+
+	if [ -z "$doi" ]; then
+		doi="$(pdftotext -q "$1" - | doi-grep)"
+		[ -n "$doi" ] && >&2 echo "Warning: DOI found in content only, mistakes are likely"
 	fi
-fi
 
-echo "$doi"
+	echo "$doi" && shift
+done
