@@ -43,7 +43,7 @@ flip_name_surname(){
 process_bibtex(){
 	author="$(parse_bibtex "$1" "author")"
 	# convert Bibtex-style author list to natural style
-	author="$(echo "$author" | sed 's/ and /\n/g' | while read line ; do
+	author="$(echo "$author" | sed 's/ and /\n/g' | while read -r line ; do
 		flip_name_surname "$line"
 	done)"
 	author="$(echo "$author" | paste -sd "," - | sed 's/,/, /g')"
