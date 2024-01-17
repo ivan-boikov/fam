@@ -30,7 +30,7 @@ Then, data from CrossRef is used to populate *standard* PDF metadata with a list
 ```shell
 doi-infer *.pdf | doi-to-bibtex > literature.bib
 ```
-(don't ask too much, don't anger CrossRef) or be extra fancy and search recursively with a bit cleaner output
+(don't ask too much too quickly, don't anger CrossRef) or be extra fancy and search recursively with a bit cleaner output
 ```shell
 find <library path> -name '*.pdf' | doi-infer | doi-to-bibtex | sed 's/\}, /\},\n\t/g' > literature.bib
 ```
