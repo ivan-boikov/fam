@@ -59,6 +59,7 @@ while [ "$#" -ne 0 ]; do
 			#if ! prompt ", try to set manually?"; then skip="1" && break ; fi
 			printf "Unable to detect DOI, input manually (blank to skip): "
 			read -r doi
+			doi="$(echo "$doi" | doi-grep)"
 			if [ -z "$doi" ]; then echo "Skipped" && skip="1" && break ; fi
 		fi
 

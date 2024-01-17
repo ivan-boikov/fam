@@ -21,21 +21,13 @@
 
 [ -z "$1" ] && printf "Usage: doi-infer [PDF]\n\nNoninteractively infer DOI of a PDF based on (in order)\n\t1. standard and custom metadata\n\t2. document-level metadata\n\t3. PDF content\nWarning: content search returns everything found and can be incorrect (example: DOI of a reference).\n" && exit
 
-grep_doi(){
-	# this regex is fine for most cases
-	# https://www.crossref.org/blog/dois-and-matching-regular-expressions/
-	# no need for "sort" before "uniq", as references are unlikely to be inside the text
-	# also since only A-Z is mentioned and not a-z (which might still happen), convert to upper case
-	grep -ioP "10.\d{4,9}/[-._;()/:A-Z0-9]+" - | tr '[:lower:]' '[:upper:]' | uniq
-}
-
 # "custom" = standard+custom properties
 # "meta" = document-level metadata
 # both are likely to be correct
-doi="$(pdfinfo -custom "$1" | grep_doi)" || doi="$(pdfinfo -meta "$1" | grep_doi)"
+doi="$(pdfinfo -custom "$1" | doi-grep)" || doi="$(pdfinfo -meta "$1" | doi-grep)"
 
 if [ -z "$doi" ]; then
-	doi="$(pdftotext -q "$1" - | grep_doi)"
+	doi="$(pdftotext -q "$1" - | doi-grep)"
 	if [ -n "$doi" ]; then
 		>&2 echo "Warning: DOI found in content only, mistakes are likely"
 	fi
