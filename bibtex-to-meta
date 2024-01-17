@@ -60,12 +60,12 @@ process_bibtex(){
 
 	subject=""
 	# ISO 690 (kind of, no guarantees)
-	if [ -n "$journal" ]; then subject="$subject, $journal"     ; fi
-	if [ -n "$year" ];    then subject="$subject, $year"        ; fi
-	if [ -n "$volume" ];  then subject="$subject, vol. $volume" ; fi
-	if [ -n "$number" ];  then subject="$subject, no. $number"  ; fi
-	if [ -n "$pages" ];   then subject="$subject, p. $pages"    ; fi
-	if [ -n "$doi" ];     then subject="$subject, doi:$doi"     ; fi
+	[ -n "$journal" ] && subject="$subject, $journal"
+	[ -n "$year" ]    && subject="$subject, $year"
+	[ -n "$volume" ]  && subject="$subject, vol. $volume"
+	[ -n "$number" ]  && subject="$subject, no. $number"
+	[ -n "$pages" ]   && subject="$subject, p. $pages"
+	[ -n "$doi" ]     && subject="$subject, doi:$doi"
 
 	add_pdf_meta "Title"   "$title"
 	add_pdf_meta "Author"  "$author"
