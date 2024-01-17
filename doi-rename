@@ -38,7 +38,7 @@ while [ "$#" -ne 0 ]; do
 	title="$(echo "$meta" | grep Title | cut -d: -f2- | xargs | tr '/' '-')"
 
 	# trim title length, 128 should suffice in most cases
-	title="$(echo $title | cut -c -128)"
+	title="$(echo "$title" | cut -c -128)"
 
 	# sanity check -- add more if needed!
 	if [ -z "$firstauthor" ] || [ -z "$title" ] || ! [ "$year" -eq 0 -o "$year" -ne 0 ] >/dev/null 2>&1 ; then
@@ -49,7 +49,7 @@ while [ "$#" -ne 0 ]; do
 
 	# personal preference: bibtex-style ref first...
 	fname="$firstauthor$year"
-	[ ! "$lastauthor" = "$firstauthor" ] && fname="$firstauthor$year-$lastauthor"
+	[ ! "$lastauthor" = "$firstauthor" ] && fname="$fname-$lastauthor"
 	# and kebab-case with lower-case symbols
 	fname="$(echo "$fname-$title.pdf" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
 
