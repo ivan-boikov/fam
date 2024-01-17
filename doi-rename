@@ -47,14 +47,11 @@ while [ "$#" -ne 0 ]; do
 		shift && continue
 	fi
 
-	# personal preference: bibtex-style ref first,
-	if [ "$lastauthor" = "$firstauthor" ]; then
-		fname="$(echo "$firstauthor$year-$title.pdf")"
-	else
-		fname="$(echo "$firstauthor$year-$lastauthor-$title.pdf")"
-	fi
+	# personal preference: bibtex-style ref first...
+	fname="$firstauthor$year"
+	[ ! "$lastauthor" = "$firstauthor" ] && fname="$firstauthor$year-$lastauthor"
 	# and kebab-case with lower-case symbols
-	fname="$(echo "$fname" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
+	fname="$(echo "$fname-$title.pdf" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')"
 
 	mv -n "$1" "$(dirname "$1")/$fname"
 
