@@ -3,7 +3,7 @@
 Manage your scientific article library using PDF metadata, Unix-style.
 
 Most PDF articles found online have useless metadata.
-To manage a library you will have to rely on 
+To manage a library you will have to rely on
 - the filesystem, which is limited
 - or an external database = additional state to maintain + can lock you into an "ecosystem" :‑###..
 
@@ -18,7 +18,11 @@ However, PDF metadata is stored alongside the content and can contain a list of 
 1. Interactively find a correct DOI of a PDF with `doi-repair`.
 No automatic internet searches and fancy algorithms -- you are way more reliable in finding a correct DOI anyway.
 Then, data from CrossRef is used to populate *standard* PDF metadata with a list of authors, a title, and an *ISO-690*-like reference with a DOI.
-2. Enjoy the profits: `doi-rename` to unify your filenames, get a DOI with `doi-infer` and convert it to a BibTeX entry with `doi-to-bibtex` or whatever else you have. The data is open -- use it!
+2. Enjoy the profits: use `doi-rename` to unify your filenames or chain `doi-infer` with `doi-to-bibtex` to generate a BibTeX file
+`doi-infer *.pdf | doi-to-bibtex > literature.bib`
+or, a little bit cleaner
+`doi-infer *.pdf | doi-to-bibtex | sed 's/\}, /\},\n\t/g' > literature.bib`
+or whatever else you have, the data is open, so use it!
 
 ## Dependencies
 The things you already have most likely.
