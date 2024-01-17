@@ -33,14 +33,21 @@ add_pdf_meta(){
 	printf "InfoBegin\nInfoKey: %s\nInfoValue: %s\n" "$1" "$2"
 }
 
+flip_name_surname(){
+	name="$(echo "$1" | cut -d, -f2 | xargs)"
+	# -s to handle cases w/o ',' like the last author of 10.1109/jqe.1983.1071749
+	surname="$(echo "$1" | cut -s -d, -f1 | xargs)"
+	echo "$name $surname"
+}
+
 process_bibtex(){
 	author="$(parse_bibtex "$1" "author")"
 	# convert Bibtex-style author list to natural style
-	author="$(echo "$author" | sed 's/ and /\n/g' | sed 's/, /\n/g' | tac | paste -d' ' - - | tac | awk '{print}' ORS=', ')"
-	author="${author%??}" # cut off excess ", " at the end
-
+	author="$(echo "$author" | sed 's/ and /\n/g' | while read line ; do
+		flip_name_surname "$line"
+	done)"
+	author="$(echo "$author" | paste -sd "," - | sed 's/,/, /g')"
 	title="$(parse_bibtex "$1" "title")"
-
 	journal="$(parse_bibtex "$1" "journal")"
 	# maybe more fallbacks?
 	if [ -z "$journal" ]; then journal="$(parse_bibtex "$1" "booktitle")" ; fi
