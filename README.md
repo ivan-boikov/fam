@@ -38,7 +38,7 @@ or whatever else you have, the data is open, so use it!
 
 ## Dependencies
 The things you already have most likely:
-- `pdftk`, an excellent PDF editing utility
+- `pdftk`, an excellent PDF editing utility, highly useful on its own
 - `pdfinfo` from the `poppler` package (a dependency of `pdftk`)
 - a PDF viewer callable by `xdg-open`
 - standard Linux utilities: `grep`, `curl` and others
