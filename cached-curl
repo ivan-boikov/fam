@@ -27,8 +27,6 @@ mkdir -p "$cache_dir"
 # unix filenames can contain any character beside / and EOL
 cache_file="$cache_dir/$(echo "$1" | tr '/' '-')"
 
-if [ ! -e "$cache_file" ]; then
-	curl -s "$@" > "$cache_file"
-fi
+[ ! -e "$cache_file" ] && curl -s "$@" > "$cache_file"
 
 cat "$cache_file"
