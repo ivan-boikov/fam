@@ -19,10 +19,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-[ -z "$1" ] && printf "Usage: doi-infer [PDF]...\n\nNoninteractively infer DOI of PDF(-s) based on (in order)\n\t1. standard and custom metadata\n\t2. document-level metadata\n\t3. PDF content\nWarning: content search returns everything found and can be incorrect (example: DOI of a reference).\n" && exit
+if [ -z "$1" ] && [ -t 0 ]; then
+	printf "Usage: doi-infer [PDF]...\n\nNoninteractively infer DOI of PDF(-s) based on (in order)\n\t1. standard and custom metadata\n\t2. document-level metadata\n\t3. PDF content\nWith no PDF, read standard input separated by newline.\nWarning: content search returns everything found and can be incorrect (example: DOI of a reference).\n"
+	exit
+fi
 
-while [ "$#" -ne 0 ]; do
-	if [ ! -f "$1" ]; then printf "File %s not found\n" "$1" && shift && continue ; fi
+process_file(){
+	if [ ! -f "$1" ]; then printf "File %s not found\n" "$1" && shift && return; fi
 
 	# "custom" = standard+custom properties
 	# "meta" = document-level metadata
@@ -34,5 +37,14 @@ while [ "$#" -ne 0 ]; do
 		[ -n "$doi" ] && >&2 echo "Warning: DOI found in content only, mistakes are likely"
 	fi
 
-	echo "$doi" && shift
+	echo "$doi"
+}
+
+[ ! -t 0 ] && while read -r file || [ -n "$file" ]; do
+	process_file "$file"
+done
+
+while [ "$#" -ne 0 ]; do
+	process_file "$1"
+	shift
 done
