@@ -50,3 +50,4 @@ No guarantees, things might crash and burn, so be careful.
 ## TODO
 - embedding keywords
 - optional removal of accented characters
+- support conference proceedings
